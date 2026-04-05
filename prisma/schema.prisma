@@ -1,0 +1,154 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ReviewAnalysisStatus {
+  CREATED
+  REQUESTED
+  ANALYZING
+  ANALYZED
+  FAILED
+  PERMANENT_FAILED
+}
+
+enum RecommendationStatus {
+  CREATED
+  GENERATED
+  FAILED
+}
+
+enum AiLogStatus {
+  SUCCESS
+  FAILED
+}
+
+enum PromptTaskType {
+  REVIEW_ANALYSIS
+  REVIEW_RECOMMENDATION
+}
+
+model User {
+  id           String   @id
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  nickname     String
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  reviews MovieReview[]
+
+  @@map("users")
+}
+
+model MovieReview {
+  id          String  @id
+  userId      String  @map("user_id")
+  movieTitle  String  @map("movie_title")
+  reviewTitle String  @map("review_title")
+  content     String
+  rating      Decimal @db.Decimal(2, 1)
+
+  analysisStatus      ReviewAnalysisStatus @map("analysis_status")
+  analysisRequestedAt DateTime?            @map("analysis_requested_at") @db.Timestamptz(3)
+  analysisStartedAt   DateTime?            @map("analysis_started_at") @db.Timestamptz(3)
+  analysisCompletedAt DateTime?            @map("analysis_completed_at") @db.Timestamptz(3)
+  analysisRetryCount  Int                  @default(0) @map("analysis_retry_count")
+  lastAnalysisError   String?              @map("last_analysis_error")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user            User             @relation(fields: [userId], references: [id])
+  analysisResult  AnalysisResult?
+  recommendations Recommendation[]
+  aiLogs          AiLog[]
+
+  @@index([userId])
+  @@index([analysisStatus])
+  @@map("movie_reviews")
+}
+
+model AnalysisResult {
+  id              String   @id
+  reviewId        String   @unique @map("review_id")
+  sentiment       String
+  summary         String
+  keywordsJson    Json     @map("keywords_json")
+  genreCategory   String   @map("genre_category")
+  moodCategory    String   @map("mood_category")
+  isSpoiler       Boolean  @map("is_spoiler")
+  confidenceScore Decimal? @map("confidence_score") @db.Decimal(3, 2)
+  rawResultJson   Json     @map("raw_result_json")
+  promptVersionId String   @map("prompt_version_id")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  review          MovieReview      @relation(fields: [reviewId], references: [id])
+  promptVersion   PromptVersion    @relation(fields: [promptVersionId], references: [id])
+  recommendations Recommendation[]
+
+  @@map("analysis_results")
+}
+
+model Recommendation {
+  id                 String               @id
+  reviewId           String               @map("review_id")
+  analysisResultId   String               @map("analysis_result_id")
+  status             RecommendationStatus
+  recommendationText String               @map("recommendation_text")
+  reasonText         String               @map("reason_text")
+  promptVersionId    String               @map("prompt_version_id")
+  createdAt          DateTime             @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  review         MovieReview    @relation(fields: [reviewId], references: [id])
+  analysisResult AnalysisResult @relation(fields: [analysisResultId], references: [id])
+  promptVersion  PromptVersion  @relation(fields: [promptVersionId], references: [id])
+
+  @@map("recommendations")
+}
+
+model AiLog {
+  id                  String         @id
+  reviewId            String?        @map("review_id")
+  taskType            PromptTaskType @map("task_type")
+  status              AiLogStatus
+  requestPayloadJson  Json           @map("request_payload_json")
+  responsePayloadJson Json?          @map("response_payload_json")
+  modelName           String         @map("model_name")
+  promptVersionId     String?        @map("prompt_version_id")
+  errorMessage        String?        @map("error_message")
+  latencyMs           Int?           @map("latency_ms")
+  createdAt           DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  review        MovieReview?   @relation(fields: [reviewId], references: [id])
+  promptVersion PromptVersion? @relation(fields: [promptVersionId], references: [id])
+
+  @@index([reviewId])
+  @@map("ai_logs")
+}
+
+model PromptVersion {
+  id                 String         @id
+  taskType           PromptTaskType @map("task_type")
+  version            String
+  name               String
+  systemPrompt       String         @map("system_prompt")
+  userPromptTemplate String         @map("user_prompt_template")
+  isActive           Boolean        @default(false) @map("is_active")
+  createdAt          DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  analysisResults AnalysisResult[]
+  recommendations Recommendation[]
+  aiLogs          AiLog[]
+
+  @@map("prompt_versions")
+}
