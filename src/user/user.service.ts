@@ -5,6 +5,8 @@ import { RequestGetUserDto } from './dto/requestGetUser.dto';
 import { ResponseGetUserDto } from './dto/responseGetUser.dto';
 import { UserCreateInputDto } from './dto/userCreateInput.dto';
 import { ResponseCreateUserDto } from './dto/responseCreateUser.dto';
+import {RequestLogInDto} from 'src/auth/dto/requestLogIn.dto';
+import { ResponseGetUserPassword } from './dto/responseGetUserPass.dto';
 
 @Injectable()
 export class UserService {
@@ -15,15 +17,16 @@ export class UserService {
             where: {
                 email: dto.email,
             },
+            select:{
+                id: true,
+                email:true,
+                nickname :true
+            }
         });
         if(!user){
             return null;
         }
-        return {
-            id: user.id,
-            email: user.email,
-            nickname: user.nickname,
-        };
+        return user;
     }
 
     async createUser(data: UserCreateInputDto): Promise<ResponseCreateUserDto> {
@@ -37,6 +40,24 @@ export class UserService {
         });
         return user;
     }
+    
+
+    async getUserWithPasswordByEmail(dto : RequestLogInDto) :Promise<ResponseGetUserPassword|null>{
+        const user = await this.db.user.findUnique({
+            where:{
+                email:dto.email
+            },
+            select:{
+                id:true,
+                email: true,
+                nickname:true,
+                passwordHash :true,
+            }
+        });
+        return user;
+    }
+
+  
 
 
     
