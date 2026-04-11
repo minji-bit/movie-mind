@@ -1,28 +1,30 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RequestSignUpDto } from './dto/requestSignUp.dto';
 import { ResponseSignUpDto } from './dto/responseSignUp.dto';
 import { RequestLogInDto } from './dto/requestLogIn.dto';
 import { ResponseLogInDto } from './dto/responseLogIn.dto';
+import { JwtAuthGuard } from './jwt-auth.guard';
+import { User } from 'src/type';
 
 @Controller('auth')
 export class AuthController {
-    constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) {}
 
-    @Post('signup')
-    async signUp(@Body() dto:RequestSignUpDto):Promise<ResponseSignUpDto>{
-        return this.authService.signUp(dto);
-    }
+  @Post('signup')
+  async signUp(@Body() dto: RequestSignUpDto): Promise<ResponseSignUpDto> {
+    return this.authService.signUp(dto);
+  }
 
-    @Post('login')
-    async logIn(@Body() dto:RequestLogInDto):Promise<ResponseLogInDto>{
-        return this.authService.logIn(dto);
-    }
+  @Post('login')
+  async logIn(@Body() dto: RequestLogInDto): Promise<ResponseLogInDto> {
+    return this.authService.logIn(dto);
+  }
 
-
-    
-
-
-
-    
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  async getMe(@Req() req: any) {
+    console.log(req.user);
+    return req.user;
+  }
 }
