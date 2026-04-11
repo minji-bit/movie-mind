@@ -1,5 +1,6 @@
-export class ResponseLogInDto{
-    id: string;
-    email: string;
-    nickname: string;
+export class ResponseLogInDto {
+  id: string;
+  email: string;
+  nickname: string;
+  accessToken: string;
 }
