@@ -6,6 +6,7 @@ import { RequestLogInDto } from './dto/requestLogIn.dto';
 import { ResponseLogInDto } from './dto/responseLogIn.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { User } from 'src/type';
+import { ResponseGetMeDto } from './dto/responseGetMe.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -23,7 +24,7 @@ export class AuthController {
 
   @Get('me')
   @UseGuards(JwtAuthGuard)
-  async getMe(@Req() req: any) {
+  async getMe(@Req() req: any): Promise<ResponseGetMeDto> {
     console.log(req.user);
     return req.user;
   }

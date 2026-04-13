@@ -60,7 +60,7 @@ model MovieReview {
   content     String
   rating      Decimal @db.Decimal(2, 1)
 
-  analysisStatus      ReviewAnalysisStatus @map("analysis_status")
+  analysisStatus      ReviewAnalysisStatus @default(CREATED) @map("analysis_status")
   analysisRequestedAt DateTime?            @map("analysis_requested_at") @db.Timestamptz(3)
   analysisStartedAt   DateTime?            @map("analysis_started_at") @db.Timestamptz(3)
   analysisCompletedAt DateTime?            @map("analysis_completed_at") @db.Timestamptz(3)
