@@ -67,11 +67,7 @@ export class ReviewService {
   }
 
   async getReviewDetail(id: string) {
-    const review = await this.db.movieReview.findUnique({
-      where: {
-        id: id,
-      },
-    });
+    const review = this.findReviewById(id);
     if (!review) {
       throw new AppException({
         message: '해당하는 리뷰가 존재하지 않습니다.',
@@ -79,5 +75,44 @@ export class ReviewService {
       });
     }
     return review;
+  }
+
+  async deleteReview(id: string, userId: string) {
+    //id로 리뷰조회
+    const review = await this.findReviewById(id);
+    //없으면 예외처리
+    if (!review) {
+      throw new AppException({
+        message: '해당하는 리뷰가 존재하지 않습니다.',
+        errorCode: ErrorCode.REVIEW_NOT_FOUND,
+      });
+    }
+    //본인 리뷰만 삭제 가능하게 처리
+    //1.로그인 사용자 userId 확인
+    //2.리뷰 작성자 userId와 비교
+    //3.다르면 예외처리
+    if (userId !== review.userId) {
+      throw new AppException({
+        message: '작성자만 삭제 가능합니다.',
+        errorCode: ErrorCode.REVIEW_DELETE_FORBIDDEN,
+      });
+    }
+
+    //삭제처리
+    const res = await this.db.movieReview.delete({
+      where: {
+        id,
+      },
+    });
+
+    return res ? '삭제가 완료되었습니다.' : '삭제에 실패했습니다.';
+  }
+
+  private async findReviewById(id: string) {
+    return await this.db.movieReview.findUnique({
+      where: {
+        id,
+      },
+    });
   }
 }

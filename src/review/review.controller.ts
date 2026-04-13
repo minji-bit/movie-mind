@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -33,5 +34,11 @@ export class ReviewController {
   @Get(':id')
   async getReviewDetail(@Param('id') id: string) {
     return this.reviewService.getReviewDetail(id);
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard)
+  async deleteReview(@Param('id') id: string, @Req() req: any) {
+    return this.reviewService.deleteReview(id, req.user.id);
   }
 }
