@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   Req,
   UseGuards,
@@ -40,5 +41,15 @@ export class ReviewController {
   @UseGuards(JwtAuthGuard)
   async deleteReview(@Param('id') id: string, @Req() req: any) {
     return this.reviewService.deleteReview(id, req.user.id);
+  }
+
+  @Patch(':id')
+  @UseGuards(JwtAuthGuard)
+  async updateReview(
+    @Param('id') id: string,
+    @Body() dto: RequestCreateReviewDto,
+    @Req() req: any,
+  ) {
+    return this.reviewService.updateReview(id, dto, req.user.id);
   }
 }

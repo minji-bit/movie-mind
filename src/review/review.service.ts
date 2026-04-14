@@ -115,4 +115,34 @@ export class ReviewService {
       },
     });
   }
+
+  async updateReview(id: string, dto: RequestCreateReviewDto, userId: string) {
+    //1. 리뷰 존재확인
+    const review = await this.db.movieReview.findUnique({
+      where: {
+        id,
+      },
+    });
+    if (!review)
+      throw new AppException({
+        message: '존재하지 않는 리뷰입니다.',
+        errorCode: ErrorCode.REVIEW_NOT_FOUND,
+      });
+    //2. 작성자 검증
+    if (userId !== review.userId)
+      throw new AppException({
+        message: '리뷰 작성자만 수정할 수 있습니다.',
+        errorCode: ErrorCode.FORBIDDEN,
+      });
+
+    const res = await this.db.movieReview.update({
+      data: {
+        ...dto,
+      },
+      where: {
+        id,
+      },
+    });
+    return res ? '리뷰가 수정되었습니다.' : '리뷰 수정이 실패했습니다.';
+  }
 }
