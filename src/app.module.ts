@@ -7,9 +7,21 @@ import { UserModule } from './user/user.module';
 import { ReviewModule } from './review/review.module';
 import { AiModule } from './ai/ai.module';
 import { AnalysisModule } from './analysis/analysis.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [PrismaModule, AuthModule, UserModule, ReviewModule, AiModule, AnalysisModule],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env',
+    }),
+    PrismaModule,
+    AuthModule,
+    UserModule,
+    ReviewModule,
+    AiModule,
+    AnalysisModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

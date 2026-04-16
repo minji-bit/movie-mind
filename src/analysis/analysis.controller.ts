@@ -13,7 +13,7 @@ export class AnalysisController {
 
   @Post(':movieTitle')
   async analyzeReview(@Param('movieTitle') movieTitle: string) {
-    await this.reviewService.getReviewsByMovieTitle(movieTitle);
-    return await this.aiService.analyzeReviews();
+    const reviews = await this.reviewService.getReviewsByMovieTitle(movieTitle);
+    return await this.aiService.analyzeReviews(reviews);
   }
 }

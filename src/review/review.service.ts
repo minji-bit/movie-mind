@@ -160,32 +160,37 @@ export class ReviewService {
     });*/
     const reviews: Review[] = [
       {
-        movieTitle: '테스트영화',
-        reviewTitle: '테스트1',
-        content: '테스트내용1',
+        movieTitle: '인터스텔라',
+        reviewTitle: '감동적인 가족 이야기',
+        content:
+          '스토리가 조금 어렵긴 했지만 감정적으로 너무 몰입됐어요. 특히 가족 이야기 부분에서 눈물 났습니다. 음악도 정말 인상적이었어요.',
       },
       {
-        movieTitle: '테스트영화',
-        reviewTitle: '테스트2',
-        content: '테스트내용2',
+        movieTitle: '인터스텔라',
+        reviewTitle: '압도적인 영상미',
+        content:
+          '영상미가 압도적이고 우주 장면이 정말 현실감 있게 느껴졌습니다. 과학적인 설정도 흥미로웠고 전체적으로 완성도가 높은 영화라고 생각합니다.',
       },
       {
-        movieTitle: '테스트영화',
-        reviewTitle: '테스트3',
-        content: '테스트내용3',
+        movieTitle: '인터스텔라',
+        reviewTitle: '이해하기 어려운 영화',
+        content:
+          '아이디어는 좋았는데 내용이 좀 어려워서 이해하기 힘들었어요. 집중해서 보면 괜찮지만 가볍게 보기에는 부담스러운 영화입니다.',
       },
       {
-        movieTitle: '테스트영화',
-        reviewTitle: '테스트4',
-        content: '테스트내용4',
+        movieTitle: '인터스텔라',
+        reviewTitle: '전개가 아쉬웠어요',
+        content:
+          '중간부터 전개가 너무 늘어지는 느낌이었습니다. 러닝타임이 길어서 지루하게 느껴졌고 기대했던 것보다는 아쉬웠어요.',
       },
       {
-        movieTitle: '테스트영화',
-        reviewTitle: '테스트5',
-        content: '테스트내용5',
+        movieTitle: '인터스텔라',
+        reviewTitle: '연기와 음악은 최고',
+        content:
+          '배우 연기와 음악이 정말 좋았고 감동적인 장면이 많았습니다. 다만 스토리가 복잡해서 한 번에 이해하기는 조금 어려웠습니다.',
       },
     ];
-    console.log(reviews);
-    // return reviews;
+
+    return reviews;
   }
 }
