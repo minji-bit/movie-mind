@@ -6,6 +6,7 @@ import { ResponseCreateReviewDto } from './dto/responseCreateReview.dto';
 import { ResponseGetReviewDto } from './dto/responseGetReview.dto';
 import { AppException } from 'src/common/exceptions/app.exception';
 import { ErrorCode } from 'src/common/exceptions/error-code';
+import { Review } from 'src/type';
 
 @Injectable()
 export class ReviewService {
@@ -144,5 +145,47 @@ export class ReviewService {
       },
     });
     return res ? '리뷰가 수정되었습니다.' : '리뷰 수정이 실패했습니다.';
+  }
+
+  async getReviewsByMovieTitle(movieTitle: string) {
+    /*const reviews = await this.db.movieReview.findMany({
+      select: {
+        movieTitle: true,
+        reviewTitle: true,
+        content: true,
+      },
+      where: {
+        movieTitle,
+      },
+    });*/
+    const reviews: Review[] = [
+      {
+        movieTitle: '테스트영화',
+        reviewTitle: '테스트1',
+        content: '테스트내용1',
+      },
+      {
+        movieTitle: '테스트영화',
+        reviewTitle: '테스트2',
+        content: '테스트내용2',
+      },
+      {
+        movieTitle: '테스트영화',
+        reviewTitle: '테스트3',
+        content: '테스트내용3',
+      },
+      {
+        movieTitle: '테스트영화',
+        reviewTitle: '테스트4',
+        content: '테스트내용4',
+      },
+      {
+        movieTitle: '테스트영화',
+        reviewTitle: '테스트5',
+        content: '테스트내용5',
+      },
+    ];
+    console.log(reviews);
+    // return reviews;
   }
 }
