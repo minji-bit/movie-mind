@@ -2,6 +2,7 @@ import { Controller, Param, Post } from '@nestjs/common';
 import { AnalysisService } from './analysis.service';
 import { ReviewService } from 'src/review/review.service';
 import { AiService } from 'src/ai/ai.service';
+import AnalysisResult from 'src/ai/types/analysisResult';
 
 @Controller('analysis')
 export class AnalysisController {
@@ -12,7 +13,9 @@ export class AnalysisController {
   ) {}
 
   @Post(':movieTitle')
-  async analyzeReview(@Param('movieTitle') movieTitle: string) {
+  async analyzeReview(
+    @Param('movieTitle') movieTitle: string,
+  ): Promise<AnalysisResult> {
     const reviews = await this.reviewService.getReviewsByMovieTitle(movieTitle);
     return await this.aiService.analyzeReviews(reviews);
   }
