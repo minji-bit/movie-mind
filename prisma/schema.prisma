@@ -4,8 +4,8 @@
 // Get a free hosted Postgres database in seconds: `npx create-db`
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider               = "prisma-client"
+  output                 = "../src/generated/prisma"
   moduleFormat           = "cjs"
   generatedFileExtension = "ts"
 }
@@ -37,6 +37,12 @@ enum AiLogStatus {
 enum PromptTaskType {
   REVIEW_ANALYSIS
   REVIEW_RECOMMENDATION
+}
+
+enum AnalysisSentiment {
+  POSITIVE
+  NEGATIVE
+  MIXED
 }
 
 model User {
@@ -71,9 +77,9 @@ model MovieReview {
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   user            User             @relation(fields: [userId], references: [id])
-  analysisResult  AnalysisResult?
-  recommendations Recommendation[]
+  analysisResult  AnalysisResult[]
   aiLogs          AiLog[]
+  recommendations Recommendation[]
 
   @@index([userId])
   @@index([analysisStatus])
@@ -81,23 +87,42 @@ model MovieReview {
 }
 
 model AnalysisResult {
-  id              String   @id
-  reviewId        String   @unique @map("review_id")
-  sentiment       String
-  summary         String
-  keywordsJson    Json     @map("keywords_json")
-  genreCategory   String   @map("genre_category")
-  moodCategory    String   @map("mood_category")
-  isSpoiler       Boolean  @map("is_spoiler")
-  confidenceScore Decimal? @map("confidence_score") @db.Decimal(3, 2)
-  rawResultJson   Json     @map("raw_result_json")
-  promptVersionId String   @map("prompt_version_id")
-  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  id String @id
 
-  review          MovieReview      @relation(fields: [reviewId], references: [id])
+  reviewId    String? @map("review_id")
+  movieTitle  String  @map("movie_title")
+  reviewCount Int     @default(0) @map("review_count")
+
+  sentiment AnalysisSentiment
+
+  summary String
+
+  prosJson Json @map("pros_json")
+  consJson Json @map("cons_json")
+
+  recommendationText String @map("recommendation_text")
+
+  keywordsJson Json @map("keywords_json")
+
+  genreCategory String @map("genre_category")
+  moodCategory  String @map("mood_category")
+
+  isSpoiler Boolean @map("is_spoiler")
+
+  confidenceScore Decimal? @map("confidence_score") @db.Decimal(3, 2)
+
+  rawResultJson Json @map("raw_result_json")
+
+  promptVersionId String @map("prompt_version_id")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  review          MovieReview?     @relation(fields: [reviewId], references: [id])
   promptVersion   PromptVersion    @relation(fields: [promptVersionId], references: [id])
   recommendations Recommendation[]
 
+  @@index([reviewId])
+  @@index([movieTitle])
   @@map("analysis_results")
 }
 
