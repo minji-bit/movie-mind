@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InputJsonObject } from '@prisma/client/runtime/client';
 import { nanoid } from 'nanoid';
 import { AiService } from 'src/ai/ai.service';
+import { AppException } from 'src/common/exceptions/app.exception';
+import { ErrorCode } from 'src/common/exceptions/error-code';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ReviewService } from 'src/review/review.service';
 
@@ -16,14 +18,46 @@ export class AnalysisService {
   async analyzeReview(movieTitle: string) {
     //해당 영화 리뷰들 조회
     const reviews = await this.reviewService.getReviewsByMovieTitle(movieTitle);
+    //리뷰 갯수가 0개면 예외처리
+    if (reviews.length === 0) {
+      throw new AppException({
+        message: '리뷰가 없습니다.',
+        errorCode: ErrorCode.REVIEW_NOT_FOUND,
+      });
+    }
     // 리뷰 문자열 조합
     const reviewText = reviews
       .map((review) => `제목:${review.reviewTitle}\n내용:${review.content}`)
       .join('\n');
+
     // AI 분석 요청
-    const result = await this.aiService.analyzeReviews(reviewText);
-    // 분석 결과 저장
+    //요청 시작 시간
+    const startTime = Date.now();
     try {
+      const result = await this.aiService.analyzeReviews(reviewText);
+      //요청 종료 시간
+      const endTime = Date.now();
+      //요청 소요 시간
+      const latencyMs = endTime - startTime;
+      //요청 로그 저장
+      await this.db.aiLog.create({
+        data: {
+          id: nanoid(),
+          reviewId: null,
+          taskType: 'REVIEW_ANALYSIS',
+          status: 'SUCCESS',
+          requestPayloadJson: {
+            movieTitle,
+            reviewCount: reviews.length,
+            reviewText,
+          },
+          responsePayloadJson: result as unknown as InputJsonObject,
+          modelName: 'gpt-4o-mini',
+          promptVersionId: '1',
+          latencyMs,
+        },
+      });
+      // 분석 결과 저장
       const analysisResult = await this.db.analysisResult.create({
         data: {
           id: nanoid(),
@@ -61,12 +95,26 @@ export class AnalysisService {
           createdAt: true,
         },
       });
-      return analysisResult;
+      return analysisResult; //저장 결과 반환
     } catch (error) {
+      const latencyMs = Date.now() - startTime;
+      await this.db.aiLog.create({
+        data: {
+          id: nanoid(),
+          reviewId: null,
+          taskType: 'REVIEW_ANALYSIS',
+          status: 'FAILED',
+          requestPayloadJson: {
+            reviewText: reviewText,
+          },
+          modelName: 'gpt-4o-mini',
+          promptVersionId: '1',
+          latencyMs: latencyMs,
+          errorMessage: error.message,
+        },
+      });
       console.error('Error analyzing review:', error);
       throw error;
     }
-
-    //저장 결과 반환
   }
 }

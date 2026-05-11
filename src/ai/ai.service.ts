@@ -53,7 +53,7 @@ export class AiService {
 
     //2.openai api를 호출한다.
     const result = await this.openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4o-m',
       messages: [
         { role: 'system', content: sysPrompt },
         { role: 'user', content: userPrompt },
