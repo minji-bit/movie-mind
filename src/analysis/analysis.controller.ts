@@ -21,4 +21,9 @@ export class AnalysisController {
   async getAnalysisResult(@Param('movieTitle') movieTitle: string) {
     return await this.analysisService.getAnalysisResult(movieTitle);
   }
+
+  @Get()
+  async getAnalysisResults() {
+    return await this.analysisService.getAnalysisResults();
+  }
 }

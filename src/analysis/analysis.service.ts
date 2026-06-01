@@ -193,6 +193,7 @@ export class AnalysisService {
       throw error;
     }
   }
+
   async getAnalysisResult(movieTitle: string) {
     const analysisResult = await this.db.analysisResult.findFirst({
       where: { movieTitle: movieTitle },
@@ -221,5 +222,27 @@ export class AnalysisService {
     }
 
     return analysisResult;
+  }
+
+  async getAnalysisResults() {
+    const analysisResults = await this.db.analysisResult.findMany({
+      select: {
+        movieTitle: true,
+        summary: true,
+        prosJson: true,
+        consJson: true,
+        recommendationText: true,
+        keywordsJson: true,
+        sentiment: true,
+        genreCategory: true,
+        moodCategory: true,
+        confidenceScore: true,
+        createdAt: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+    return analysisResults;
   }
 }
