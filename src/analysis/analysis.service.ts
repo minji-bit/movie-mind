@@ -95,45 +95,71 @@ export class AnalysisService {
           latencyMs,
         },
       });
-      // 분석 결과 저장
-      const analysisResult = await this.db.analysisResult.create({
-        data: {
-          id: nanoid(),
-          movieTitle,
-          reviewCount: reviews.length,
-          sentiment: result.sentiment,
-          summary: result.summary,
-          prosJson: result.prosJson as unknown as InputJsonObject,
-          consJson: result.consJson as unknown as InputJsonObject,
-          recommendationText: result.recommendationText,
-          keywordsJson: result.keywordsJson as unknown as InputJsonObject,
-          genreCategory: result.genreCategory,
-          moodCategory: result.moodCategory,
-          isSpoiler: result.isSpoiler,
-          confidenceScore: result.confidenceScore,
-          rawResultJson: result as unknown as InputJsonObject,
-          promptVersionId: prompt.id,
-        },
-        select: {
-          id: true,
-          movieTitle: true,
-          reviewCount: true,
-          sentiment: true,
-          summary: true,
-          prosJson: true,
-          consJson: true,
-          recommendationText: true,
-          keywordsJson: true,
-          genreCategory: true,
-          moodCategory: true,
-          isSpoiler: true,
-          confidenceScore: true,
-          rawResultJson: true,
-          promptVersionId: true,
-          createdAt: true,
+
+      const existing = await this.db.analysisResult.findFirst({
+        where: {
+          movieTitle: movieTitle,
         },
       });
-      return analysisResult; //저장 결과 반환
+      if (existing) {
+        await this.db.analysisResult.update({
+          where: { id: existing.id },
+          data: {
+            sentiment: result.sentiment,
+            summary: result.summary,
+            prosJson: result.prosJson as unknown as InputJsonObject,
+            consJson: result.consJson as unknown as InputJsonObject,
+            recommendationText: result.recommendationText,
+            keywordsJson: result.keywordsJson as unknown as InputJsonObject,
+            genreCategory: result.genreCategory,
+            moodCategory: result.moodCategory,
+            isSpoiler: result.isSpoiler,
+            confidenceScore: result.confidenceScore,
+            rawResultJson: result as unknown as InputJsonObject,
+            promptVersionId: prompt.id,
+          },
+        });
+      } else {
+        // 분석 결과 저장
+        const analysisResult = await this.db.analysisResult.create({
+          data: {
+            id: nanoid(),
+            movieTitle,
+            reviewCount: reviews.length,
+            sentiment: result.sentiment,
+            summary: result.summary,
+            prosJson: result.prosJson as unknown as InputJsonObject,
+            consJson: result.consJson as unknown as InputJsonObject,
+            recommendationText: result.recommendationText,
+            keywordsJson: result.keywordsJson as unknown as InputJsonObject,
+            genreCategory: result.genreCategory,
+            moodCategory: result.moodCategory,
+            isSpoiler: result.isSpoiler,
+            confidenceScore: result.confidenceScore,
+            rawResultJson: result as unknown as InputJsonObject,
+            promptVersionId: prompt.id,
+          },
+          select: {
+            id: true,
+            movieTitle: true,
+            reviewCount: true,
+            sentiment: true,
+            summary: true,
+            prosJson: true,
+            consJson: true,
+            recommendationText: true,
+            keywordsJson: true,
+            genreCategory: true,
+            moodCategory: true,
+            isSpoiler: true,
+            confidenceScore: true,
+            rawResultJson: true,
+            promptVersionId: true,
+            createdAt: true,
+          },
+        });
+        return analysisResult; //저장 결과 반환
+      }
     } catch (error) {
       //상태변경 FAILED
       await this.db.movieReview.updateMany({
