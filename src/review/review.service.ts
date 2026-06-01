@@ -148,8 +148,9 @@ export class ReviewService {
   }
 
   async getReviewsByMovieTitle(movieTitle: string) {
-    /*const reviews = await this.db.movieReview.findMany({
+    const reviews = await this.db.movieReview.findMany({
       select: {
+        id: true,
         movieTitle: true,
         reviewTitle: true,
         content: true,
@@ -157,8 +158,8 @@ export class ReviewService {
       where: {
         movieTitle,
       },
-    });*/
-    const reviews: Review[] = [
+    });
+    /*const reviews: Review[] = [
       {
         movieTitle: '인터스텔라',
         reviewTitle: '감동적인 가족 이야기',
@@ -189,7 +190,7 @@ export class ReviewService {
         content:
           '배우 연기와 음악이 정말 좋았고 감동적인 장면이 많았습니다. 다만 스토리가 복잡해서 한 번에 이해하기는 조금 어려웠습니다.',
       },
-    ];
+    ];*/
 
     return reviews;
   }

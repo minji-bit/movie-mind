@@ -8,6 +8,9 @@ import { ReviewModule } from './review/review.module';
 import { AiModule } from './ai/ai.module';
 import { AnalysisModule } from './analysis/analysis.module';
 import { ConfigModule } from '@nestjs/config';
+import { PromptVersionController } from './prompt-version/prompt-version.controller';
+import { PromptVersionService } from './prompt-version/prompt-version.service';
+import { PromptVersionModule } from './prompt-version/prompt-version.module';
 
 @Module({
   imports: [
@@ -21,8 +24,9 @@ import { ConfigModule } from '@nestjs/config';
     ReviewModule,
     AiModule,
     AnalysisModule,
+    PromptVersionModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [AppController, PromptVersionController],
+  providers: [AppService, PromptVersionService],
 })
 export class AppModule {}

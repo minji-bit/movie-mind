@@ -1,4 +1,4 @@
-import { Controller, Param, Post } from '@nestjs/common';
+import { Controller, Get, Param, Post } from '@nestjs/common';
 import { AnalysisService } from './analysis.service';
 import { ReviewService } from 'src/review/review.service';
 import { AiService } from 'src/ai/ai.service';
@@ -15,5 +15,10 @@ export class AnalysisController {
   @Post(':movieTitle')
   async analyzeReview(@Param('movieTitle') movieTitle: string) {
     return await this.analysisService.analyzeReview(movieTitle);
+  }
+
+  @Get(':movieTitle')
+  async getAnalysisResult(@Param('movieTitle') movieTitle: string) {
+    return await this.analysisService.getAnalysisResult(movieTitle);
   }
 }
