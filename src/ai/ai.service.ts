@@ -16,7 +16,7 @@ export class AiService {
   async analyzeReviews(
     reviewText: string,
     prompt: GetPromptVersionDto,
-  ): Promise<AnalysisResult> {
+  ): Promise<AnalysisResult | undefined> {
     //1.prompt를 작성한다.
     const sysPrompt = prompt.systemPrompt;
     const userPrompt = prompt.userPromptTemplate.replace(
@@ -39,7 +39,7 @@ export class AiService {
           .replace(/```/g, '')
           .trim() || '{}';
 
-      const analysisResult: AnalysisResult = JSON.parse(cleaned);
+      const analysisResult: AnalysisResult | undefined = JSON.parse(cleaned);
       return analysisResult;
     } catch (error) {
       console.error('Raw AI content:', result.choices[0].message?.content);

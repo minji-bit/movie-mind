@@ -5,6 +5,7 @@ import { AiService } from 'src/ai/ai.service';
 import { AppException } from 'src/common/exceptions/app.exception';
 import { ErrorCode } from 'src/common/exceptions/error-code';
 import { PromptTaskType } from 'src/generated/enums';
+import { AnalysisResult } from 'src/generated/prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { GetPromptVersionDto } from 'src/prompt-version/dto/getPromptVersion.dto';
 import { PromptVersionService } from 'src/prompt-version/prompt-version.service';
@@ -29,6 +30,25 @@ export class AnalysisService {
         errorCode: ErrorCode.REVIEW_NOT_FOUND,
       });
     }
+    // 리뷰 문자열 조합
+    const reviewText = reviews
+      .map((review) => `제목:${review.reviewTitle}\n내용:${review.content}`)
+      .join('\n');
+
+    /*
+    기본 분석 요청: 기존 결과 있으면 반환
+    재분석 요청: 나중에 별도 API로 추가할 예정*/
+
+    //분석 요청 전에 기존 분석 결과 조회
+    const existingAnalysisResult = await this.db.analysisResult.findFirst({
+      where: { movieTitle: movieTitle },
+    });
+
+    if (existingAnalysisResult) {
+      //기존 분석 결과가 있으면 반환
+      return existingAnalysisResult;
+    }
+
     //상태변경 REQUESTED
     await this.db.movieReview.updateMany({
       where: { movieTitle: movieTitle },
@@ -37,34 +57,74 @@ export class AnalysisService {
         analysisRequestedAt: new Date().toISOString(),
       },
     });
-    // 리뷰 문자열 조합
-    const reviewText = reviews
-      .map((review) => `제목:${review.reviewTitle}\n내용:${review.content}`)
-      .join('\n');
+    //상태변경 ANALYZING
+    await this.db.movieReview.updateMany({
+      where: { movieTitle: movieTitle },
+      data: {
+        analysisStatus: 'ANALYZING',
+        analysisStartedAt: new Date().toISOString(),
+      },
+    });
+
+    //프롬프트 버전 조회
+    const prompt: GetPromptVersionDto | null =
+      await this.promptVersionService.getPromptVersions();
+    if (!prompt) {
+      throw new AppException({
+        message: '프롬프트 버전이 없습니다.',
+        errorCode: ErrorCode.ACTIVE_PROMPT_NOT_FOUND,
+      });
+    }
 
     //요청 시작 시간
     const startTime = Date.now();
     try {
-      //상태변경 ANALYZING
-      await this.db.movieReview.updateMany({
-        where: { movieTitle: movieTitle },
-        data: {
-          analysisStatus: 'ANALYZING',
-          analysisStartedAt: new Date().toISOString(),
-        },
-      });
-
-      //프롬프트 버전 조회
-      const prompt: GetPromptVersionDto | null =
-        await this.promptVersionService.getPromptVersions();
-      if (!prompt) {
-        throw new AppException({
-          message: '프롬프트 버전이 없습니다.',
-          errorCode: ErrorCode.ACTIVE_PROMPT_NOT_FOUND,
-        });
-      }
       //AI 분석 요청
       const result = await this.aiService.analyzeReviews(reviewText, prompt);
+      if (!result) {
+        throw new AppException({
+          message: '분석 결과를 생성할 수 없습니다.',
+          errorCode: ErrorCode.ANALYSIS_RESULT_NOT_FOUND,
+        });
+      }
+      // 분석 결과 저장
+      const analysisResult = await this.db.analysisResult.create({
+        data: {
+          id: nanoid(),
+          movieTitle,
+          reviewCount: reviews.length,
+          sentiment: result.sentiment,
+          summary: result.summary,
+          prosJson: result.prosJson as unknown as InputJsonObject,
+          consJson: result.consJson as unknown as InputJsonObject,
+          recommendationText: result.recommendationText,
+          keywordsJson: result.keywordsJson as unknown as InputJsonObject,
+          genreCategory: result.genreCategory,
+          moodCategory: result.moodCategory,
+          isSpoiler: result.isSpoiler,
+          confidenceScore: result.confidenceScore,
+          rawResultJson: result as unknown as InputJsonObject,
+          promptVersionId: prompt.id,
+        },
+        select: {
+          id: true,
+          movieTitle: true,
+          reviewCount: true,
+          sentiment: true,
+          summary: true,
+          prosJson: true,
+          consJson: true,
+          recommendationText: true,
+          keywordsJson: true,
+          genreCategory: true,
+          moodCategory: true,
+          isSpoiler: true,
+          confidenceScore: true,
+          rawResultJson: true,
+          promptVersionId: true,
+          createdAt: true,
+        },
+      });
       //상태변경 ANALYZED
       await this.db.movieReview.updateMany({
         where: { movieTitle: movieTitle },
@@ -73,6 +133,7 @@ export class AnalysisService {
           analysisCompletedAt: new Date().toISOString(),
         },
       });
+
       //요청 종료 시간
       const endTime = Date.now();
       //요청 소요 시간
@@ -96,78 +157,16 @@ export class AnalysisService {
         },
       });
 
-      const existing = await this.db.analysisResult.findFirst({
-        where: {
-          movieTitle: movieTitle,
-        },
-      });
-      if (existing) {
-        await this.db.analysisResult.update({
-          where: { id: existing.id },
-          data: {
-            sentiment: result.sentiment,
-            summary: result.summary,
-            prosJson: result.prosJson as unknown as InputJsonObject,
-            consJson: result.consJson as unknown as InputJsonObject,
-            recommendationText: result.recommendationText,
-            keywordsJson: result.keywordsJson as unknown as InputJsonObject,
-            genreCategory: result.genreCategory,
-            moodCategory: result.moodCategory,
-            isSpoiler: result.isSpoiler,
-            confidenceScore: result.confidenceScore,
-            rawResultJson: result as unknown as InputJsonObject,
-            promptVersionId: prompt.id,
-          },
-        });
-      } else {
-        // 분석 결과 저장
-        const analysisResult = await this.db.analysisResult.create({
-          data: {
-            id: nanoid(),
-            movieTitle,
-            reviewCount: reviews.length,
-            sentiment: result.sentiment,
-            summary: result.summary,
-            prosJson: result.prosJson as unknown as InputJsonObject,
-            consJson: result.consJson as unknown as InputJsonObject,
-            recommendationText: result.recommendationText,
-            keywordsJson: result.keywordsJson as unknown as InputJsonObject,
-            genreCategory: result.genreCategory,
-            moodCategory: result.moodCategory,
-            isSpoiler: result.isSpoiler,
-            confidenceScore: result.confidenceScore,
-            rawResultJson: result as unknown as InputJsonObject,
-            promptVersionId: prompt.id,
-          },
-          select: {
-            id: true,
-            movieTitle: true,
-            reviewCount: true,
-            sentiment: true,
-            summary: true,
-            prosJson: true,
-            consJson: true,
-            recommendationText: true,
-            keywordsJson: true,
-            genreCategory: true,
-            moodCategory: true,
-            isSpoiler: true,
-            confidenceScore: true,
-            rawResultJson: true,
-            promptVersionId: true,
-            createdAt: true,
-          },
-        });
-        return analysisResult; //저장 결과 반환
-      }
+      return analysisResult; //저장 결과 반환
     } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
       //상태변경 FAILED
       await this.db.movieReview.updateMany({
         where: { movieTitle: movieTitle },
         data: {
           analysisStatus: 'FAILED',
           analysisCompletedAt: new Date().toISOString(),
-          lastAnalysisError: error.message,
+          lastAnalysisError: message,
           analysisRetryCount: {
             increment: 1,
           },
@@ -178,18 +177,20 @@ export class AnalysisService {
         data: {
           id: nanoid(),
           reviewId: null,
-          taskType: 'REVIEW_ANALYSIS',
+          taskType: prompt.taskType,
           status: 'FAILED',
           requestPayloadJson: {
-            reviewText: reviewText,
+            movieTitle,
+            reviewCount: reviews.length,
+            reviewText,
           },
           modelName: 'gpt-4o-mini',
-          promptVersionId: null,
+          promptVersionId: prompt.id,
           latencyMs: latencyMs,
-          errorMessage: error.message,
+          errorMessage: message,
         },
       });
-      console.error('Error analyzing review:', error);
+      console.error('Error analyzing review:', message);
       throw error;
     }
   }
