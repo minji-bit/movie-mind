@@ -6,6 +6,6 @@ export enum ErrorCode {
   REVIEW_NOT_FOUND = '존재하지 않는 리뷰입니다.',
   REVIEW_DELETE_FORBIDDEN = '리뷰 삭제 권한이 없습니다.',
   FORBIDDEN = '권한이 없습니다.',
-  ANALYSIS_RESULT_NOT_FOUND = '존재하지 않는 분석 결과입니다.',
+  ANALYSIS_RESULT_NOT_FOUND = '분석 결과를 생성할 수 없습니다.',
   ACTIVE_PROMPT_NOT_FOUND = '활성화된 프롬프트가 존재하지 않습니다.',
 }
