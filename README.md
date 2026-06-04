@@ -1,98 +1,158 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# 🎬 MovieMind
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+AI 기반 영화 리뷰 종합 분석 플랫폼
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+MovieMind는 동일 영화에 대한 여러 사용자의 리뷰를 수집하고, AI를 활용하여 리뷰를 종합 분석한 결과를 제공하는 서비스입니다.
 
-## Description
+단순히 개별 리뷰를 분석하는 것이 아니라 여러 리뷰를 종합하여 영화에 대한 감정, 장단점, 추천 의견을 도출하는 것을 목표로 합니다.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+---
 
-## Project setup
+# 📌 프로젝트 소개
 
-```bash
-$ npm install
+사용자가 작성한 영화 리뷰를 기반으로 AI가 종합 분석을 수행하여 다음과 같은 정보를 제공합니다.
+
+- 영화에 대한 전체 감성 분석
+- 주요 장점 및 단점 분석
+- 추천 대상 분석
+- 키워드 추출
+- 장르 및 분위기 분류
+
+---
+
+# 🛠 기술 스택
+
+## Backend
+
+- NestJS
+- TypeScript
+- Prisma ORM
+- PostgreSQL (Supabase)
+
+## Authentication
+
+- JWT Authentication
+- Bcrypt
+
+## AI
+
+- OpenAI API
+- Structured Output(JSON)
+
+## Etc
+
+- Nanoid
+
+---
+
+# ✨ 주요 기능
+
+## 사용자
+
+- 회원가입
+- 로그인
+- 내 정보 조회
+
+## 리뷰
+
+- 영화 리뷰 등록
+- 영화 리뷰 조회
+- 영화 리뷰 수정
+- 영화 리뷰 삭제
+
+## AI 분석
+
+- 영화 리뷰 종합 분석
+- 분석 결과 저장
+- 분석 결과 조회
+
+## 운영 기능
+
+- AI 요청/응답 로그 저장
+- AI 요청/응답 로그 조회
+- Prompt Version 관리
+- 분석 상태 관리
+
+---
+
+# 🤖 AI 분석 프로세스
+
+1. 동일 영화에 대한 리뷰 조회
+2. 활성화된 Prompt Version 조회
+3. OpenAI API 호출
+4. JSON Structured Output 생성
+5. AnalysisResult 저장
+6. AI Log 저장
+7. 분석 결과 반환
+
+---
+
+# 📊 분석 결과 예시
+
+- 감성 분석 (POSITIVE / NEGATIVE / MIXED)
+- 요약(Summary)
+- 장점(Pros)
+- 단점(Cons)
+- 추천 의견(Recommendation)
+- 주요 키워드
+- 장르 분류
+- 분위기 분류
+- 스포일러 여부
+- 신뢰도 점수
+
+---
+
+# 🏗 설계 특징
+
+## Aggregate Analysis
+
+개별 리뷰가 아닌 동일 영화의 여러 리뷰를 종합 분석합니다.
+
+## Prompt Version 관리
+
+프롬프트를 코드가 아닌 데이터로 관리하여 운영 중에도 버전 변경이 가능합니다.
+
+## AI Log
+
+AI 요청 및 응답을 저장하여 분석 이력 및 장애 상황을 추적할 수 있습니다.
+
+## Analysis Status
+
+분석 상태를 관리합니다.
+
+- REQUESTED
+- ANALYZING
+- ANALYZED
+- FAILED
+
+---
+
+# 📂 프로젝트 구조
+
+```text
+src
+├─ auth
+├─ user
+├─ review
+├─ analysis
+├─ ai
+├─ ai-log
+├─ prompt-version
+├─ prisma
+└─ common
 ```
 
-## Compile and run the project
+---
 
-```bash
-# development
-$ npm run start
+# 🚀 향후 계획
 
-# watch mode
-$ npm run start:dev
+- Next.js 프론트엔드 개발
+- 영화 추천 기능 고도화
+- 개인 취향 기반 추천 기능
+- 외부 영화 API 연동
+- AI 분석 결과 시각화
+- 관리자 페이지 구축
 
-# production mode
-$ npm run start:prod
 ```
 
-## Run tests
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
 ```
-
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
