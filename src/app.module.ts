@@ -11,6 +11,9 @@ import { ConfigModule } from '@nestjs/config';
 import { PromptVersionController } from './prompt-version/prompt-version.controller';
 import { PromptVersionService } from './prompt-version/prompt-version.service';
 import { PromptVersionModule } from './prompt-version/prompt-version.module';
+import { AiLogController } from './ai-log/ai-log.controller';
+import { AiLogService } from './ai-log/ai-log.service';
+import { AiLogModule } from './ai-log/ai-log.module';
 
 @Module({
   imports: [
@@ -25,8 +28,9 @@ import { PromptVersionModule } from './prompt-version/prompt-version.module';
     AiModule,
     AnalysisModule,
     PromptVersionModule,
+    AiLogModule,
   ],
-  controllers: [AppController, PromptVersionController],
-  providers: [AppService, PromptVersionService],
+  controllers: [AppController, PromptVersionController, AiLogController],
+  providers: [AppService, PromptVersionService, AiLogService],
 })
 export class AppModule {}
