@@ -48,6 +48,7 @@ export class ReviewService {
       select: {
         id: true,
         movieTitle: true,
+        reviewTitle: true,
         content: true,
         rating: true,
         createdAt: true,
@@ -60,6 +61,7 @@ export class ReviewService {
       return {
         id: review.id,
         movieTitle: review.movieTitle,
+        reviewTitle: review.reviewTitle,
         content: review.content,
         rating: review.rating.toNumber(),
         createdAt: review.createdAt,
